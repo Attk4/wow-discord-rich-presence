@@ -6,11 +6,13 @@ import win32api
 import win32con
 import win32gui
 
-
 # variables that can be configured
-DEBUG = 0
-MY_WIDTH = 11.61
-DISCORD_CLIENT_ID = '483214843734654987'
+DEBUG = 1
+# MY_WIDTH = 12 # 1080p 100%
+MY_WIDTH = 15 # 1080p 125%
+DISCORD_CLIENT_ID = 'YOUR_CLIENT_ID_HERE'
+WOW_ICON = '1024px-wow_icon'
+
 
 # these are internal use variables, don't touch them
 decoded = ''
@@ -18,12 +20,10 @@ wow_hwnd = None
 rpc_obj = None
 last_first_line = None
 last_second_line = None
-failed_reads = 0
 
 
 def callback(hwnd, extra):
     global wow_hwnd
-
     if (win32gui.GetWindowText(hwnd) == 'World of Warcraft' and
             win32gui.GetClassName(hwnd).startswith('GxWindowClass')):
         wow_hwnd = hwnd
@@ -34,9 +34,7 @@ def read_squares(hwnd):
     height = (win32api.GetSystemMetrics(win32con.SM_CYCAPTION) +
               win32api.GetSystemMetrics(win32con.SM_CYBORDER) * 4 +
               win32api.GetSystemMetrics(win32con.SM_CYEDGE) * 2)
-
-    new_rect = (rect[0] + 8, rect[1] + height,
-                rect[2] - 8, rect[1] + height + MY_WIDTH)
+    new_rect = (rect[0], rect[1], rect[2], MY_WIDTH)
     try:
         im = ImageGrab.grab(new_rect)
     except Image.DecompressionBombError:
@@ -62,11 +60,9 @@ def read_squares(hwnd):
     try:
         decoded = bytes(read).decode('utf-8').rstrip('\0')
     except Exception as exc:
-        print('Error decoding the pixels: %s.' % exc)
         if not DEBUG:
             return
-
-    parts = decoded.replace('$WorldOfWarcraftIPC$', '').split('|')
+    parts = decoded.replace('$WorldOfWarcraftDRP$', '').split('|')
 
     if DEBUG:
         im.show()
@@ -74,9 +70,8 @@ def read_squares(hwnd):
 
     # sanity check
     if (len(parts) != 2 or
-            not decoded.endswith('$WorldOfWarcraftIPC$') or
-            not decoded.startswith('$WorldOfWarcraftIPC$')):
-        print('Wrong data read: %s' % decoded)
+            not decoded.endswith('$WorldOfWarcraftDRP$') or
+            not decoded.startswith('$WorldOfWarcraftDRP$')):
         return
 
     first_line, second_line = parts
@@ -101,25 +96,9 @@ while True:
         lines = read_squares(wow_hwnd)
 
         if not lines:
-            # there's been a problem reading the squares. if this has happened
-            # too many times, it's probably because the game is in the log in
-            # or character selection screen, so disconnect from discord
-            if failed_reads > 9 and rpc_obj:
-                print("I've failed to read the squares too many times. I will "
-                      "keep trying but by now I'll disconnect from Discord.")
-                rpc_obj.close()
-                rpc_obj = None
-                last_first_line, last_second_line = None, None
-            elif failed_reads > 9:
-                pass
-            else:
-                # bump the number of failed reads
-                failed_reads += 1
-                print('Failed to read the squares: attempt #%d' % failed_reads)
             time.sleep(1)
             continue
 
-        failed_reads = 0
         first_line, second_line = lines
 
         if first_line != last_first_line or second_line != last_second_line:
@@ -148,7 +127,7 @@ while True:
                 'details': first_line,
                 'state': second_line,
                 'assets': {
-                    'large_image': 'wow-icon'
+                    'large_image': WOW_ICON
                 }
             }
 
