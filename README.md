@@ -38,7 +38,7 @@ This fork works with Retail.
 
 8. Create a new Discord Application at https://discordapp.com/developers/applications/ called `World of Warcraft`, copy the Client ID, and add the World of Warcraft logo as a Rich Presence Asset.
 
-9. Edit the DiscordRichPresence.py file again, this time change `DEBUG` to 1, `DISCORD_CLIENT_ID` to your copied Client ID, and `WOW_ICON` to the name of the logo without the extension.
+9. Edit the DiscordRichPresence.py file again, this time change `DEBUG` to 0, `DISCORD_CLIENT_ID` to your copied Client ID, and `WOW_ICON` to the name of the logo without the extension.
 
 
 From now on, you can double-click the DiscordRichPresence.py file and it will work by itself. Your rich presence will be updated automatically as long as the script is kept running. You can just create a shortcut to this script on your Desktop and open it every time you open WoW.
