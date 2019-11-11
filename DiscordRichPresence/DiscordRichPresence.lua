@@ -1,6 +1,7 @@
 local currentArea = nil
 local frame_count = 0
 local frames = {}
+local realmData = {"US", "KR", "EU", "TW", "CH"}
 
 function DRP_CreateFrames()
 	local size = 12
@@ -72,23 +73,30 @@ end
 function DRP_EncodeZoneType()
     local name, instanceType, difficultyID, difficultyName, maxPlayers,
         dynamicDifficulty, isDynamic, instanceID, instanceGroupSize, LfgDungeonID = GetInstanceInfo()
-    local zone_name = GetRealZoneText()
-	if instanceType == 'party' then
+    local playerName = UnitName("player")
+    local playerRealm = GetRealmName()
+    local playerRegion = realmData[GetCurrentRegion()]
+    local playerClass = UnitClass("player")
+    -- ??
+    local zone_name = GetSubZoneText()
+    if instanceType == 'party' then
         status = string.format('In %s Dungeon', difficultyName)
     elseif instanceType == 'raid' then
-        status = 'In Raid'
+        status = string.format('In %s Raid', difficultyName)
     elseif instanceType == 'pvp' then
         status = 'In Battleground'
     else
         if UnitIsDeadOrGhost("player") and not UnitIsDead("player") then
             status = "Corpse running"
         else
-			status = GetSubZoneText()
+			status = GetRealZoneText() .. " - " .. name
 			currentArea = status
         end
     end
+    local playerInfo = playerName .. " - " .. playerClass
+    local realmInfo = playerRegion .. " - " .. playerRealm
     if zone_name == "" or zone_name == nil then return nil end
-    local encoded = "$WorldOfWarcraftDRP$" .. zone_name .. "|" .. status .. "$WorldOfWarcraftDRP$"
+    local encoded = "$WorldOfWarcraftDRP$" .. zone_name .. "|" .. status .. "|" .. playerInfo .. "|" .. realmInfo .. "$WorldOfWarcraftDRP$"
     return encoded
 end
 
@@ -98,25 +106,38 @@ function DRP_CleanFrames()
     end
 end
 
+function paintMessageWait()
+	local encoded = DRP_EncodeZoneType()
+    if encoded ~= nil then DRP_PaintSomething(encoded) end
+    C_Timer.After(5, DRP_CleanFrames)
+end
+
 function DRP_OnLoad()
 	print("Discord Rich Presence Loaded")
     DRPFrame:RegisterEvent("PLAYER_LOGIN")
     DRPFrame:RegisterEvent("ZONE_CHANGED")
     DRPFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
     DRPFrame:RegisterEvent("ZONE_CHANGED_INDOORS")
-	SLASH_DRP1, SLASH_DRP2 = '/drp', '/discordrichpresence'
-	function SlashCmdList.DRP()
-		paintMessageWait()
-	end
-	DRP_CreateFrames()
-end
-
-function paintMessageWait()
-	local encoded = DRP_EncodeZoneType()
-	if encoded ~= nil then DRP_PaintSomething(encoded) end
-	C_Timer.After(5, DRP_CleanFrames)
+    DRP_CreateFrames()
+    paintMessageWait()
 end
 
 function DRP_OnEvent(event)
-	paintMessageWait()
+    paintMessageWait()
+end
+
+SLASH_DRP1, SLASH_DRP2 = '/drp', '/discordrichpresence'
+function SlashCmdList.DRP()
+    paintMessageWait()
+end
+
+SLASH_DRPTEST1 = '/drptest'
+function SlashCmdList.DRPTEST()
+    local encoded = DRP_EncodeZoneType()
+    if encoded ~= nil then DRP_PaintSomething(encoded) end
+end
+
+SLASH_CLEAN1 = '/drpclean'
+function SlashCmdList.CLEAN()
+    DRP_CleanFrames()
 end
