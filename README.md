@@ -1,7 +1,5 @@
 # Discord rich presence for World of Warcraft
 
-![STV](https://github.com/wodim/wow-discord-rich-presence/raw/master/images/rich-presence-1.png) ![WSG](https://github.com/wodim/wow-discord-rich-presence/raw/master/images/rich-presence-2.png)
-
 Important: this requires a bit of patience and setup to make it work, so bear with me.
 This fork works with Retail.
 
@@ -13,7 +11,7 @@ This fork works with Retail.
 
 1. [Download a copy of this repo](https://github.com/Attk4/wow-discord-rich-presence/archive/master.zip) and decompress it. Inside you will find a WoW addon and a Python script.
 
-2. Install the WoW addon by copying the DiscordRichPresence folder to your _Interface/AddOns_ directory. When you log in, type /drp into your chat, and you will see a few coloured squares on top of your portrait.
+2. Install the WoW addon by copying the DiscordRichPresence folder to your _Interface/AddOns_ directory. When you log in, type _/drptest_ into your chat, and you will see a few coloured squares on top of your portrait.
 
     ![Squares](https://github.com/Attk4/wow-discord-rich-presence/raw/master/images/squares.png)
 
@@ -23,10 +21,10 @@ This fork works with Retail.
 4. Move to the directory where you decompressed this repo with the cd command, then cd into the **script** folder. For example, if you decompressed it into your Downloads folder, you will have to do something like this:
     `cd Downloads\wow-discord-rich-presence\script`
 
-5. Go back to the command prompt while WoW is still open behind it, making sure none of the squares are being covered by the command prompt, and type this to run the wow.py script:
+5. Go back to the command prompt while WoW is still open behind it, making sure none of the squares are being covered by the command prompt, and type this to run the DiscordRichPresence.py script:
     `python DiscordRichPresence.py`
 
-6. Now, this is the tricky part. Your image viewer has opened and you will see something like this:
+6. Now, this is the tricky part. Your image viewer has opened and you might see something like this:
 
     ![Misaligned dots](https://github.com/Attk4/wow-discord-rich-presence/raw/master/images/misaligned-squares.png)
 
@@ -36,14 +34,15 @@ This fork works with Retail.
 
     ![Aligned dots](https://github.com/Attk4/wow-discord-rich-presence/raw/master/images/aligned-squares.png)
 
-8. Create a new Discord Application at https://discordapp.com/developers/applications/ called `World of Warcraft`, copy the Client ID, and add the World of Warcraft logo as a Rich Presence Asset.
+8. Create a new Discord Application at https://discordapp.com/developers/applications/ called `World of Warcraft`, copy the Client ID, and add the World of Warcraft logo and your Character icon as a Rich Presence Asset.
 
-9. Edit the DiscordRichPresence.py file again, this time change `DEBUG` to 0, `DISCORD_CLIENT_ID` to your copied Client ID, and `WOW_ICON` to the name of the logo without the extension.
+9. Edit the DiscordRichPresence.py file again, this time change `DEBUG` to 0, `DISCORD_CLIENT_ID` to your copied Client ID, `WOW_ICON` and `PLAYER_ICON` to the name of the icons without the extensions.
 
+10. You can now clean your window by typing _/drpclean_. On zone change it will appear automatically, then disappear after 5 seconds. If it fails to update, you can use _/drp_ to trigger this manually.
 
 From now on, you can double-click the DiscordRichPresence.py file and it will work by itself. Your rich presence will be updated automatically as long as the script is kept running. You can just create a shortcut to this script on your Desktop and open it every time you open WoW.
 
 ## Licence
 
-Both the addon and the wow.py script are in the public domain.
+Both the addon and the DiscordRichPresence.py script are in the public domain.
 The rpc.py file is from [this repo](https://github.com/suclearnub/python-discord-rpc) and it's [MIT licenced](https://raw.githubusercontent.com/wodim/wow-discord-rich-presence/master/script/rpc.py-LICENSE).

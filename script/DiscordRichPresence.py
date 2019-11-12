@@ -7,9 +7,10 @@ import win32con
 import win32gui
 
 # variables that can be configured
-DEBUG = 0
+DEBUG = 1
 MY_WIDTH = 12 # 1080p 100%
 #MY_WIDTH = 15 # 1080p 125%
+DISCORD_CLIENT_ID = 'YOUR_CLIENT_ID_HERE'
 WOW_ICON = '1024px-wow_icon'
 PLAYER_ICON = '124911418-avatar512x512'
 
