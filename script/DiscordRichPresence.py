@@ -7,11 +7,11 @@ import win32con
 import win32gui
 
 # variables that can be configured
-DEBUG = 1
-# MY_WIDTH = 12 # 1080p 100%
-MY_WIDTH = 15 # 1080p 125%
-DISCORD_CLIENT_ID = 'YOUR_CLIENT_ID_HERE'
+DEBUG = 0
+MY_WIDTH = 12 # 1080p 100%
+#MY_WIDTH = 15 # 1080p 125%
 WOW_ICON = '1024px-wow_icon'
+PLAYER_ICON = '124911418-avatar512x512'
 
 
 # these are internal use variables, don't touch them
@@ -20,6 +20,8 @@ wow_hwnd = None
 rpc_obj = None
 last_first_line = None
 last_second_line = None
+last_third_line = None
+last_fourth_line = None
 
 
 def callback(hwnd, extra):
@@ -69,14 +71,14 @@ def read_squares(hwnd):
         return
 
     # sanity check
-    if (len(parts) != 2 or
+    if (len(parts) != 4 or
             not decoded.endswith('$WorldOfWarcraftDRP$') or
             not decoded.startswith('$WorldOfWarcraftDRP$')):
         return
 
-    first_line, second_line = parts
+    first_line, second_line, third_line, fourth_line = parts
 
-    return first_line, second_line
+    return first_line, second_line, third_line, fourth_line
 
 
 while True:
@@ -99,12 +101,14 @@ while True:
             time.sleep(1)
             continue
 
-        first_line, second_line = lines
+        first_line, second_line, third_line, fourth_line = lines
 
         if first_line != last_first_line or second_line != last_second_line:
             # there has been an update, so send it to discord
             last_first_line = first_line
             last_second_line = second_line
+            last_third_line = third_line
+            last_fourth_line = fourth_line
 
             if not rpc_obj:
                 print('Not connected to Discord, connecting...')
@@ -122,13 +126,20 @@ while True:
                         break
                 print('Connected to Discord.')
 
-            print('Setting new activity: %s - %s' % (first_line, second_line))
+            print('Setting new activity: %s - %s - %s - %s' % (first_line, second_line, third_line, fourth_line))
+            dungeonTimer = {}
+            if("Dungeon" in second_line or "Raid" in second_line or "Battleground" in second_line):
+                dungeonTimer = { 'start': round(time.time()) }
             activity = {
                 'details': first_line,
                 'state': second_line,
                 'assets': {
-                    'large_image': WOW_ICON
-                }
+                    'large_image': WOW_ICON,
+                    'large_text': fourth_line,
+                    'small_image': PLAYER_ICON,
+                    'small_text': third_line
+                },
+                'timestamps': dungeonTimer
             }
 
             try:
@@ -136,12 +147,12 @@ while True:
             except Exception as exc:
                 print('Looks like the connection to Discord was broken (%s). '
                       'I will try to connect again in 5 sec.' % str(exc))
-                last_first_line, last_second_line = None, None
+                last_first_line, last_second_line, last_third_line, last_fourth_line = None, None, None, None
                 rpc_obj = None
     elif not wow_hwnd and rpc_obj:
         print('WoW no longer exists, disconnecting')
         rpc_obj.close()
         rpc_obj = None
         # clear these so it gets reread and resubmitted upon reconnection
-        last_first_line, last_second_line = None, None
+        last_first_line, last_second_line, last_third_line, last_fourth_line = None, None, None, None
     time.sleep(5)

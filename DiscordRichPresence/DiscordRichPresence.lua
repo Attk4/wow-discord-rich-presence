@@ -1,4 +1,3 @@
-local currentArea = nil
 local frame_count = 0
 local frames = {}
 local realmData = {"US", "KR", "EU", "TW", "CH"}
@@ -73,31 +72,36 @@ end
 function DRP_EncodeZoneType()
     local name, instanceType, difficultyID, difficultyName, maxPlayers,
         dynamicDifficulty, isDynamic, instanceID, instanceGroupSize, LfgDungeonID = GetInstanceInfo()
+	local firstLine = nil
+	local secondLineFirst = nil
+	local secondLineSecond = nil
     local playerName = UnitName("player")
     local playerRealm = GetRealmName()
     local playerRegion = realmData[GetCurrentRegion()]
     local playerClass = UnitClass("player")
-    -- ??
-    local zone_name = GetSubZoneText()
+    local zone_name = GetRealZoneText()
     if instanceType == 'party' then
-        status = string.format('In %s Dungeon', difficultyName)
+		firstLine = GetRealZoneText()
+		secondLine = string.format('In %s Dungeon', difficultyName)
     elseif instanceType == 'raid' then
-        status = string.format('In %s Raid', difficultyName)
+		firstLine = GetRealZoneText()
+		secondLine = string.format('In %s Raid', difficultyName)
     elseif instanceType == 'pvp' then
-        status = 'In Battleground'
+		firstLine = GetRealZoneText()
+		secondLine = "In Battleground"
     else
         if UnitIsDeadOrGhost("player") and not UnitIsDead("player") then
-            status = "Corpse running"
+			firstLine = GetSubZoneText()
+            secondLine = "Corpse Running"
         else
-			status = GetRealZoneText() .. " - " .. name
-			currentArea = status
+			firstLine = GetSubZoneText()
+			secondLine = GetRealZoneText() .. " - " .. name
         end
     end
     local playerInfo = playerName .. " - " .. playerClass
     local realmInfo = playerRegion .. " - " .. playerRealm
-    if zone_name == "" or zone_name == nil then return nil end
-    local encoded = "$WorldOfWarcraftDRP$" .. zone_name .. "|" .. status .. "|" .. playerInfo .. "|" .. realmInfo .. "$WorldOfWarcraftDRP$"
-    return encoded
+    if firstLine == "" or firstLine == nil or secondLine == "" or secondLine == nil then return nil end
+    return "$WorldOfWarcraftDRP$" .. firstLine .. "|" .. secondLine .. "|" .. playerInfo .. "|" .. realmInfo .. "$WorldOfWarcraftDRP$"
 end
 
 function DRP_CleanFrames()
@@ -118,6 +122,7 @@ function DRP_OnLoad()
     DRPFrame:RegisterEvent("ZONE_CHANGED")
     DRPFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
     DRPFrame:RegisterEvent("ZONE_CHANGED_INDOORS")
+	DRPFrame:RegisterEvent("PLAYER_UNGHOST")
     DRP_CreateFrames()
     paintMessageWait()
 end
