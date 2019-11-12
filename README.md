@@ -11,7 +11,7 @@ This fork works with Retail.
 
 1. [Download a copy of this repo](https://github.com/Attk4/wow-discord-rich-presence/archive/master.zip) and decompress it. Inside you will find a WoW addon and a Python script.
 
-2. Install the WoW addon by copying the DiscordRichPresence folder to your _Interface/AddOns_ directory. When you log in, type _/drptest_ into your chat, and you will see a few coloured squares on top of your portrait.
+2. Install the WoW addon by copying the DiscordRichPresence folder to your _Interface/AddOns_ directory. When you log in, type **/drptest** into your chat, and you will see a few coloured squares on top of your portrait.
 
     ![Squares](https://github.com/Attk4/wow-discord-rich-presence/raw/master/images/squares.png)
 
@@ -38,7 +38,7 @@ This fork works with Retail.
 
 9. Edit the DiscordRichPresence.py file again, this time change `DEBUG` to 0, `DISCORD_CLIENT_ID` to your copied Client ID, `WOW_ICON` and `PLAYER_ICON` to the name of the icons without the extensions.
 
-10. You can now clean your window by typing _/drpclean_. On zone change it will appear automatically, then disappear after 5 seconds. If it fails to update, you can use _/drp_ to trigger this manually.
+10. You can now clean your window by typing **/drpclean**. On certain events (player login, zone change, revive) the squares will appear automatically, then disappear after 5 seconds. If it fails to update, you can use **/drp** to trigger this manually.
 
 From now on, you can double-click the DiscordRichPresence.py file and it will work by itself. Your rich presence will be updated automatically as long as the script is kept running. You can just create a shortcut to this script on your Desktop and open it every time you open WoW.
 
