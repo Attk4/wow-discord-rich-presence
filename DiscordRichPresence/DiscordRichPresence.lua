@@ -99,6 +99,9 @@ function DRP_EncodeZoneType()
 		else
 			firstLine = sub_name
 			secondLine = zone_name .. " - " .. name
+			if zone_name == name then
+				secondLine = name
+			end
 		end
 	end
 	local playerInfo = playerName .. " - " .. playerClass
