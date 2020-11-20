@@ -1,19 +1,17 @@
 import rpc
 import time
+import json
+import os
 
 from PIL import Image, ImageGrab
 import win32api
 import win32con
 import win32gui
 
-# variables that can be configured
-DEBUG = 1
-MY_WIDTH = 12 # 1080p 100%
-#MY_WIDTH = 15 # 1080p 125%
-DISCORD_CLIENT_ID = 'YOUR_CLIENT_ID_HERE'
-WOW_ICON = '1024px-wow_icon'
-PLAYER_ICON = '124911418-avatar512x512'
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
+f = open(dir_path + '/config.json')
+config = json.load(f)
 
 # these are internal use variables, don't touch them
 decoded = ''
@@ -24,7 +22,6 @@ last_second_line = None
 last_third_line = None
 last_fourth_line = None
 
-
 def callback(hwnd, extra):
     global wow_hwnd
     if (win32gui.GetWindowText(hwnd) == 'World of Warcraft' and
@@ -34,10 +31,10 @@ def callback(hwnd, extra):
 
 def read_squares(hwnd):
     rect = win32gui.GetWindowRect(hwnd)
-    height = (win32api.GetSystemMetrics(win32con.SM_CYCAPTION) +
-              win32api.GetSystemMetrics(win32con.SM_CYBORDER) * 4 +
-              win32api.GetSystemMetrics(win32con.SM_CYEDGE) * 2)
-    new_rect = (rect[0], rect[1], rect[2], MY_WIDTH)
+    #height = (win32api.GetSystemMetrics(win32con.SM_CYCAPTION) +
+    #        win32api.GetSystemMetrics(win32con.SM_CYBORDER) * 4 +
+    #        win32api.GetSystemMetrics(win32con.SM_CYEDGE) * 2)
+    new_rect = (rect[0], rect[1], rect[2], config["my_width"])
     try:
         im = ImageGrab.grab(new_rect)
     except Image.DecompressionBombError:
@@ -45,12 +42,12 @@ def read_squares(hwnd):
         return
 
     read = []
-    for square_idx in range(int(im.width / MY_WIDTH)):
-        x = int(square_idx * MY_WIDTH + MY_WIDTH / 2)
-        y = int(MY_WIDTH / 2)
+    for square_idx in range(int(im.width / config["my_width"])):
+        x = int(square_idx * config["my_width"] + config["my_width"] / 2)
+        y = int(config["my_width"] / 2)
         r, g, b = im.getpixel((x, y))
 
-        if DEBUG:
+        if config["debug"]:
             im.putpixel((x, y), (255, 255, 255))
 
         if r == g == b == 0:
@@ -62,12 +59,12 @@ def read_squares(hwnd):
 
     try:
         decoded = bytes(read).decode('utf-8').rstrip('\0')
-    except Exception as exc:
-        if not DEBUG:
+    except:
+        if not config["debug"]:
             return
     parts = decoded.replace('$WorldOfWarcraftDRP$', '').split('|')
 
-    if DEBUG:
+    if config["debug"]:
         im.show()
         return
 
@@ -86,14 +83,14 @@ while True:
     wow_hwnd = None
     win32gui.EnumWindows(callback, None)
 
-    if DEBUG:
-        # if in debug mode, squares are read, the image with the dot matrix is
+    if config["debug"]:
+        # if in DEBUG mode, squares are read, the image with the dot matrix is
         # shown and then the script quits.
         if wow_hwnd:
-            print('Debug: reading squares. Is everything alright?')
+            print('DEBUG: reading squares. Is everything alright?')
             read_squares(wow_hwnd)
         else:
-            print("Launching in debug mode but I couldn't find WoW.")
+            print("Launching in DEBUG mode but I couldn't find WoW.")
         break
     elif win32gui.GetForegroundWindow() == wow_hwnd:
         lines = read_squares(wow_hwnd)
@@ -116,11 +113,11 @@ while True:
                 while True:
                     try:
                         rpc_obj = (rpc.DiscordIpcClient
-                                   .for_platform(DISCORD_CLIENT_ID))
+                                .for_platform(config["discord_client_id"]))
                     except Exception as exc:
                         print("I couldn't connect to Discord (%s). It's "
-                              'probably not running. I will try again in 5 '
-                              'sec.' % str(exc))
+                            'probably not running. I will try again in 5 '
+                            'sec.' % str(exc))
                         time.sleep(5)
                         pass
                     else:
@@ -132,13 +129,11 @@ while True:
             if("Dungeon" in second_line or "Raid" in second_line or "Battleground" in second_line):
                 dungeonTimer = { 'start': round(time.time()) }
             activity = {
-                'details': first_line,
-                'state': second_line,
+                'details': third_line,
+                'state': first_line + ' - ' + second_line,
                 'assets': {
-                    'large_image': WOW_ICON,
-                    'large_text': fourth_line,
-                    'small_image': PLAYER_ICON,
-                    'small_text': third_line
+                    'large_image': config["wow_icon"],
+                    'large_text': fourth_line
                 },
                 'timestamps': dungeonTimer
             }
@@ -147,7 +142,7 @@ while True:
                 rpc_obj.set_activity(activity)
             except Exception as exc:
                 print('Looks like the connection to Discord was broken (%s). '
-                      'I will try to connect again in 5 sec.' % str(exc))
+                    'I will try to connect again in 5 sec.' % str(exc))
                 last_first_line, last_second_line, last_third_line, last_fourth_line = None, None, None, None
                 rpc_obj = None
     elif not wow_hwnd and rpc_obj:

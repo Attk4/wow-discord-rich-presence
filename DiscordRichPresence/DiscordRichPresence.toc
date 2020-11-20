@@ -1,7 +1,8 @@
-## Interface: 80205
+## Interface: 90002
+
 ## Title: Discord Rich Presence
 ## Author: Attka
-## Version: 1.0
+## Version: v1.0
 ## Notes: Colour-coded messages on the top of your screen for DiscordRichPresence.py
 
 DiscordRichPresence.xml

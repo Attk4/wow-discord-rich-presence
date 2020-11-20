@@ -98,10 +98,7 @@ function DRP_EncodeZoneType()
 			secondLine = "Corpse Running"
 		else
 			firstLine = sub_name
-			secondLine = zone_name .. " - " .. name
-			if zone_name == name then
-				secondLine = name
-			end
+			secondLine = zone_name
 		end
 	end
 	local playerInfo = playerName .. " - " .. playerClass
@@ -121,7 +118,7 @@ function paintMessageWait()
 	if(last_encoded ~= encoded and encoded ~= nil) then
 		last_encoded = encoded
 		DRP_PaintSomething(encoded)
-		C_Timer.After(5, DRP_CleanFrames)
+		C_Timer.After(10, DRP_CleanFrames)
 	end
 end
 
